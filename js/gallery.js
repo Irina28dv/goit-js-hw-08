@@ -65,43 +65,55 @@ const images = [
   ];
 
   const gallery = document.querySelector('.gallery');
-  const galleryItemsMarkup = images.map(({ preview, original, description }) => {
-    return `
-      <li class="gallery-item">
-        <a class="gallery-link" href="${original}">
-          <img
-            class="gallery-image"
-            src="${preview}"
-            data-source="${original}"
-            alt="${description}"
-          />
-        </a>
-      </li>
-    `;
-  }).join('');
+
+  const galleryItemsMarkup = images
+    .map(({ preview, original, description }) => {
+      return `
+        <li class="gallery-item">
+          <a class="gallery-link" href="${original}">
+            <img
+              class="gallery-image"
+              src="${preview}"
+              data-source="${original}"
+              alt="${description}"
+            />
+          </a>
+        </li>
+      `;
+    })
+    .join('');
   
   gallery.innerHTML = galleryItemsMarkup;
-
+  
   let instance;
-
+  
   gallery.addEventListener('click', handleGalleryClick);
-
-function handleGalleryClick(event) {
-  const target = event.target;
-  if (target.nodeName !== 'IMG') return;
-
-  event.preventDefault();
-
-  const largeImageURL = target.dataset.source;
-  instance = basicLightbox.create(`
-  <img src="${largeImageURL}" width="1112" height="640">
-`);
-  instance.show();
+  
+  function handleGalleryClick(event) {
+    const target = event.target;
+    if (target.nodeName !== 'IMG') return;
+  
+    event.preventDefault();
+  
+    const largeImageURL = target.dataset.source;
+  
+    instance = basicLightbox.create(
+      `<img src="${largeImageURL}" width="1112" height="640">`,
+      {
+        onShow: () => {
+          document.addEventListener('keydown', escapePress);
+        },
+        onClose: () => {
+          document.removeEventListener('keydown', escapePress);
+        },
+      }
+    );
+  
+    instance.show();
   }
-  document.addEventListener('keydown', escapePress);
-
-function escapePress(event) {
-  if (event.code === 'Escape') {
-    instance.close();
+  
+  function escapePress(event) {
+    if (event.code === 'Escape') {
+      instance.close();
+    }
   }
-}
